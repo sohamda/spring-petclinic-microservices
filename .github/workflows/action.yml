@@ -6,6 +6,8 @@ permissions:
   contents: read
 
 env:
+  ASC_PACKAGE_PATH: ${{ github.workspace }}
+  SPRING_CLOUD_SERVICE: spring-petclinic-utrechtjug
   # ==== APPS ====:
   API_GATEWAY: api-gateway
   ADMIN_SERVER: admin-server
@@ -26,9 +28,7 @@ jobs:
     - name: Azure CLI Login
       uses: azure/login@v1
       with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
     
     - name: Checkout your repo
       uses: actions/checkout@v2
@@ -43,18 +43,23 @@ jobs:
     - name: maven build, clean
       run: |
         mvn clean package -DskipTests
-    
+
+    - name: Create Config Server
+      run: >
+        az spring config-server set 
+        --config-file ${{ env.ASC_PACKAGE_PATH }}/**/application.yml 
+        --name ${{ env.SPRING_CLOUD_SERVICE }}   
+
     - name: Deploy api-gateway
       uses: azure/spring-apps-deploy@v1
       with:
         azure-subscription: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         action: deploy
-        service-name: ${{ secrets.SPRING_APPS_SERVICE_NAME }}
+        service-name: ${{ env.SPRING_CLOUD_SERVICE }}
         app-name: ${{ env.API_GATEWAY }}
         use-staging-deployment: false
         package: ${{ github.workspace }}/${{ env.API_GATEWAY_JAR }}
         jvm-options: -Xms2048m -Xmx2048m
-        runtime-version: Java_17
         environment-variables: -SPRING_PROFILES_ACTIVE passwordless
     
     - name: Deploy admin-server
@@ -62,12 +67,11 @@ jobs:
       with:
         azure-subscription: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         action: deploy
-        service-name: ${{ secrets.SPRING_APPS_SERVICE_NAME }}
+        service-name: ${{ env.SPRING_CLOUD_SERVICE }}
         app-name: ${{ env.ADMIN_SERVER }}
         use-staging-deployment: false
         package: ${{ github.workspace }}/${{ env.ADMIN_SERVER_JAR }}
         jvm-options: -Xms2048m -Xmx2048m
-        runtime-version: Java_17
         environment-variables: "-SPRING_PROFILES_ACTIVE passwordless"
 
     - name: Deploy customers-service
@@ -75,12 +79,11 @@ jobs:
       with:
         azure-subscription: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         action: deploy
-        service-name: ${{ secrets.SPRING_APPS_SERVICE_NAME }}
+        service-name: ${{ env.SPRING_CLOUD_SERVICE }}
         app-name: ${{ env.CUSTOMERS_SERVICE }}
         use-staging-deployment: false
         package: ${{ github.workspace }}/${{ env.CUSTOMERS_SERVICE_JAR }}
         jvm-options: -Xms2048m -Xmx2048m
-        runtime-version: Java_17
         environment-variables: -SPRING_PROFILES_ACTIVE passwordless
 
     - name: Deploy vets-service
@@ -88,12 +91,11 @@ jobs:
       with:
         azure-subscription: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         action: deploy
-        service-name: ${{ secrets.SPRING_APPS_SERVICE_NAME }}
+        service-name: ${{ env.SPRING_CLOUD_SERVICE }}
         app-name: ${{ env.VETS_SERVICE }}
         use-staging-deployment: false
         package: ${{ github.workspace }}/${{ env.VETS_SERVICE_JAR }}
         jvm-options: -Xms2048m -Xmx2048m
-        runtime-version: Java_17
         environment-variables: -SPRING_PROFILES_ACTIVE passwordless
 
     - name: Deploy visits-service
@@ -101,10 +103,9 @@ jobs:
       with:
         azure-subscription: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         action: deploy
-        service-name: ${{ secrets.SPRING_APPS_SERVICE_NAME }}
+        service-name: ${{ env.SPRING_CLOUD_SERVICE }}
         app-name: ${{ env.VISITS_SERVICE }}
         use-staging-deployment: false
         package: ${{ github.workspace }}/${{ env.VISITS_SERVICE_JAR }}
         jvm-options: -Xms2048m -Xmx2048m
-        runtime-version: Java_17
         environment-variables: -SPRING_PROFILES_ACTIVE passwordless
