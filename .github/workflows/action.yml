@@ -53,7 +53,8 @@ jobs:
       run: >
         az spring config-server set 
         --config-file ${{ env.ASC_PACKAGE_PATH }}/**/application.yml 
-        --name ${{ env.SPRING_CLOUD_SERVICE }}   
+        --name ${{ env.SPRING_CLOUD_SERVICE }} 
+        --resource-group ${{ secrets.RESOURCE_GROUP }}
 
     - name: Deploy api-gateway
       uses: azure/spring-apps-deploy@v1
