@@ -52,7 +52,7 @@ jobs:
     - name: Create Config Server
       run: >
         az spring config-server set 
-        --config-file ${{ env.ASC_PACKAGE_PATH }}/**/application.yml 
+        --config-file ${{ env.ASC_PACKAGE_PATH }}/application.yml 
         --name ${{ env.SPRING_CLOUD_SERVICE }} 
         --resource-group ${{ secrets.RESOURCE_GROUP }}
 
