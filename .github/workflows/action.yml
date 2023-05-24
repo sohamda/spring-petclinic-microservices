@@ -7,7 +7,7 @@ permissions:
 
 env:
   ASC_PACKAGE_PATH: ${{ github.workspace }}
-  SPRING_CLOUD_SERVICE: spring-petclinic-utrechtjug
+  SPRING_CLOUD_SERVICE: spring-petclinic-jug
   # ==== APPS ====:
   API_GATEWAY: api-gateway
   ADMIN_SERVER: admin-server
